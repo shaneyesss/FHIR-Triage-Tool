@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="grid-two">
+  <article class="panel">
+    <h2>Triage: {{ patient.name }}</h2>
+    <p><strong>Patient ID:</strong> {{ patient.id }}</p>
+    <p><strong>Demographics:</strong> {{ patient.gender }} | DOB {{ patient.birth_date }}</p>
+
+    <h3>Recent Visits (Last 3)</h3>
+    {% if visits %}
+      <ul class="data-list">
+        {% for visit in visits %}
+          <li>
+            <strong>{{ visit.type }}</strong>
+            <span>{{ visit.date }}</span>
+            <span>Status: {{ visit.status }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No recent encounters found.</p>
+    {% endif %}
+
+    <h3>Medical History (Conditions)</h3>
+    {% if history %}
+      <ul class="chips">
+        {% for item in history[:15] %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No condition history found.</p>
+    {% endif %}
+  </article>
+
+  <article class="panel">
+    <h2>Enter Triage Data</h2>
+    <form method="post" class="triage-form">
+      {% if form_error %}
+        <p class="form-error">{{ form_error }}</p>
+      {% endif %}
+
+      <label>
+        Chief Complaint Category
+        <select name="chief_complaint_code" required>
+          <option value="" disabled {% if not selected_complaint_code %}selected{% endif %}>Select a complaint</option>
+          {% for option in complaint_options %}
+            <option value="{{ option.code }}" {% if selected_complaint_code == option.code %}selected{% endif %}>{{ option.label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>
+        Complaint Details (optional, required for Other)
+        <textarea name="chief_complaint_details" placeholder="Add symptom details, onset, or context">{{ chief_complaint_details }}</textarea>
+      </label>
+
+      <div class="vitals-grid">
+        <label>Heart Rate (bpm)<input type="number" name="heart_rate" min="20" max="250" required></label>
+        <label>Systolic BP (mmHg)<input type="number" name="systolic_bp" min="40" max="300" required></label>
+        <label>Diastolic BP (mmHg)<input type="number" name="diastolic_bp" min="20" max="200"></label>
+        <label>Temperature (F)<input type="number" step="0.1" name="temperature_f" min="86" max="113" required></label>
+        <label>Respiratory Rate<input type="number" name="respiratory_rate" min="4" max="60" required></label>
+        <label>SpO2 (%)<input type="number" name="spo2" min="50" max="100" required></label>
+        <label>Pain Score (0-10)<input type="number" name="pain_score" min="0" max="10" required></label>
+      </div>
+
+      <button type="submit">Calculate Triage + Add to Waiting Room</button>
+    </form>
+  </article>
+</section>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="grid-two">
+  <article class="panel">
+    <div class="panel-title-row">
+      <h2>Patient Information</h2>
+      <a class="link-button" href="{{ url_for('main.dashboard') }}">Back to Dashboard</a>
+    </div>
+
+    <h3>{{ patient.name }}</h3>
+    <p><strong>Patient ID:</strong> {{ patient.id }}</p>
+    <p><strong>Demographics:</strong> {{ patient.gender }} | DOB {{ patient.birth_date }}</p>
+  </article>
+
+  <article class="panel">
+    <h2>Recent Visits (Last 3)</h2>
+    {% if visits %}
+      <ul class="data-list">
+        {% for visit in visits %}
+          <li>
+            <strong>{{ visit.type }}</strong>
+            <span>{{ visit.date }}</span>
+            <span>Status: {{ visit.status }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No recent encounters found.</p>
+    {% endif %}
+  </article>
+
+  <article class="panel">
+    <h2>Medical History (Conditions)</h2>
+    {% if history %}
+      <ul class="chips">
+        {% for item in history %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No condition history found.</p>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

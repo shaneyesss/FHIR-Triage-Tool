@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="dashboard-grid">
+  <article class="panel">
+    <h2>Patient History Lookup</h2>
+    <p>Search by patient name to quickly review history from FHIR.</p>
+    <form id="history-search-form" class="inline-search-form">
+      <input id="history-search-input" type="text" minlength="2" placeholder="Search patient name">
+      <button type="submit">Search</button>
+    </form>
+    <p id="history-search-feedback" class="feedback"></p>
+    <ul id="history-search-results" class="result-list compact"></ul>
+  </article>
+
+  <article class="panel">
+    <div class="panel-title-row">
+      <h2>Waiting Room Queue</h2>
+      <a class="link-button" href="{{ url_for('main.patient_search_page') }}">+ Start New Intake</a>
+    </div>
+    <p>Cards are sorted by severity. Drag to reorder, or drag to an empty ED room.</p>
+
+    <div id="waiting-room" class="queue" data-role="queue">
+      {% for item in waiting_room %}
+        <div class="patient-card severity-{{ item.triage.score }}" draggable="true" data-queue-id="{{ item.queue_id }}">
+          <h3>{{ item.patient.name }}</h3>
+          <p><strong>Chief complaint:</strong> {{ item.chief_complaint }}</p>
+          <p><strong>Triage:</strong> {{ item.triage.score }} / 100 ({{ item.triage.level }})</p>
+          <p><strong>Vitals:</strong> HR {{ item.vitals.heart_rate }} | BP {{ item.vitals.systolic_bp }}/{{ item.vitals.diastolic_bp or 'n/a' }} | Temp {{ item.vitals.temperature_f or item.vitals.temperature_c or 'n/a' }}{% if item.vitals.temperature_f %}F{% elif item.vitals.temperature_c %}C{% endif %} | RR {{ item.vitals.respiratory_rate }} | SpO2 {{ item.vitals.spo2 }}%</p>
+          {% if item.triage.reasons %}
+            <details>
+              <summary>Score factors</summary>
+              <ul>
+                {% for reason in item.triage.reasons %}
+                  <li>{{ reason }}</li>
+                {% endfor %}
+              </ul>
+            </details>
+          {% endif %}
+        </div>
+      {% else %}
+        <p class="empty-note">No one in waiting room yet.</p>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="panel">
+    <h2>Emergency Department Rooms</h2>
+    <p>Drop a waiting-room patient into an empty room.</p>
+    <div class="rooms-grid">
+      {% for room_id, occupant in rooms.items() %}
+        <div class="room" data-room-id="{{ room_id }}">
+          <h3>{{ room_id }}</h3>
+          {% if occupant %}
+            <div class="room-occupant">
+              <p><strong>{{ occupant.patient.name }}</strong></p>
+              <p>Score: {{ occupant.triage.score }} ({{ occupant.triage.level }})</p>
+              <p>Vitals: HR {{ occupant.vitals.heart_rate }} | BP {{ occupant.vitals.systolic_bp }}/{{ occupant.vitals.diastolic_bp or 'n/a' }} | Temp {{ occupant.vitals.temperature_f or occupant.vitals.temperature_c or 'n/a' }}{% if occupant.vitals.temperature_f %}F{% elif occupant.vitals.temperature_c %}C{% endif %} | RR {{ occupant.vitals.respiratory_rate }} | SpO2 {{ occupant.vitals.spo2 }}%</p>
+              <button type="button" class="danger-button discharge-button" data-room-id="{{ room_id }}">Discharge</button>
+            </div>
+          {% else %}
+            <div class="room-empty">Empty room</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

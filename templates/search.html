@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="panel">
+  <h2>Find Patient</h2>
+  <p>Step 1: Search by patient name. Results are queried live from the SMART on FHIR R4 server.</p>
+
+  <form id="patient-search-form" class="search-form">
+    <input id="patient-name" name="name" placeholder="Enter patient name" minlength="2" required>
+    <button type="submit">Search FHIR</button>
+  </form>
+
+  <div id="search-feedback" class="feedback"></div>
+  <ul id="patient-results" class="result-list"></ul>
+</section>
+
+<script src="{{ url_for('static', filename='js/search.js') }}"></script>
+{% endblock %}
